@@ -1,0 +1,82 @@
+name: 'Setup Pebble SDK'
+description: 'Set up the Pebble (Core Devices) Watch SDK build environment and optionally build a .pbw app or watchface.'
+author: 'levonn-dev'
+
+branding:
+  icon: 'watch'
+  color: 'red'
+
+inputs:
+  build:
+    description: 'Run `pebble build` after the SDK is set up, producing a .pbw. Set to "true" to build.'
+    required: false
+    default: 'false'
+  working-directory:
+    description: 'Directory of the Pebble project to build (contains package.json and wscript). Used only when build is "true".'
+    required: false
+    default: '.'
+  sdk-version:
+    description: 'Pebble SDK version to install with `pebble sdk install` (e.g. "latest" or a pinned version).'
+    required: false
+    default: 'latest'
+  cache:
+    description: 'Cache the installed SDK/toolchain (~/.pebble-sdk) and pebble-tool (~/.local/share/uv) between runs.'
+    required: false
+    default: 'true'
+
+outputs:
+  pbw-path:
+    description: 'Absolute path to the built .pbw. Set only when build is "true".'
+    value: ${{ steps.build.outputs.pbw-path }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Cache Pebble SDK and tooling
+      if: inputs.cache == 'true'
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.pebble-sdk
+          ~/.local/share/uv
+        key: ${{ runner.os }}-pebble-${{ inputs.sdk-version }}
+
+    - name: Install system dependencies
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y --no-install-recommends \
+          libsdl2-2.0-0 libglib2.0-0 libpixman-1-0 zlib1g libsndio7.0
+
+    - name: Install uv
+      shell: bash
+      run: |
+        curl -LsSf https://astral.sh/uv/install.sh | sh
+        echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+    - name: Install pebble-tool
+      shell: bash
+      run: uv tool install pebble-tool --python 3.13
+
+    - name: Install Pebble SDK
+      shell: bash
+      run: |
+        pebble sdk install "${{ inputs.sdk-version }}"
+        pebble --version
+
+    - name: Build Pebble project
+      id: build
+      if: inputs.build == 'true'
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: |
+        pebble build
+        shopt -s nullglob
+        pbw_files=(build/*.pbw)
+        if [ ${#pbw_files[@]} -eq 0 ]; then
+          echo "::error::pebble build did not produce a .pbw in $(pwd)/build" >&2
+          exit 1
+        fi
+        pbw_path="$(readlink -f "${pbw_files[0]}")"
+        echo "pbw-path=$pbw_path" >> "$GITHUB_OUTPUT"
+        echo "Built .pbw: $pbw_path"

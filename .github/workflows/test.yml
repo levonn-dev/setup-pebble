@@ -1,0 +1,56 @@
+name: Test setup-pebble
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  setup-only:
+    name: Setup only (build:false)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run setup-pebble without building
+        uses: ./
+        with:
+          build: 'false'
+
+      - name: Verify SDK is available and no .pbw was built
+        shell: bash
+        run: |
+          pebble --version
+          if ls examples/sample-watchface/build/*.pbw >/dev/null 2>&1; then
+            echo "::error::A .pbw was produced even though build was false"
+            exit 1
+          fi
+          echo "Setup-only OK: pebble is on PATH and no .pbw was produced."
+
+  build:
+    name: Setup and build (build:true)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run setup-pebble and build the sample watchface
+        id: setup
+        uses: ./
+        with:
+          build: 'true'
+          working-directory: examples/sample-watchface
+
+      - name: Verify the .pbw output
+        shell: bash
+        run: |
+          echo "pbw-path output: ${{ steps.setup.outputs.pbw-path }}"
+          test -n "${{ steps.setup.outputs.pbw-path }}"
+          test -f "${{ steps.setup.outputs.pbw-path }}"
+          echo "Build OK."
+
+      - name: Upload the built .pbw
+        uses: actions/upload-artifact@v4
+        with:
+          name: sample-watchface-pbw
+          path: examples/sample-watchface/build/*.pbw
+          if-no-files-found: error
