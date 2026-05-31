@@ -81,7 +81,10 @@ A typical workflow for those projects:
 
 ```yaml
 name: Build
-on: [push, pull_request]
+on:
+  push:
+    branches: [main]
+  pull_request:
 jobs:
   build:
     runs-on: ubuntu-latest
