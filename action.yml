@@ -54,9 +54,13 @@ runs:
         curl -LsSf https://astral.sh/uv/install.sh | sh
         echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
+    # Use --force so the `pebble` shim in ~/.local/bin is (re)created on cache
+    # hits: a restored ~/.local/share/uv makes a plain `uv tool install` a no-op
+    # ("already installed"), and the shim itself is not cached -> otherwise the
+    # next step fails with `pebble: command not found`.
     - name: Install pebble-tool
       shell: bash
-      run: uv tool install pebble-tool --python 3.13
+      run: uv tool install --force pebble-tool --python 3.13
 
     - name: Install Pebble SDK
       shell: bash

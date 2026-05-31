@@ -62,7 +62,7 @@ steps:
 ## What it does
 
 1. Installs the system libraries the SDK needs (`libsdl2`, `libglib2.0`, `libpixman-1`, `zlib1g`, `libsndio`). Node.js is assumed to be present (it is preinstalled on GitHub-hosted `ubuntu-latest`).
-2. Installs [`uv`](https://docs.astral.sh/uv/) and the Pebble CLI: `uv tool install pebble-tool --python 3.13`.
+2. Installs [`uv`](https://docs.astral.sh/uv/) and the Pebble CLI (`uv tool install --force pebble-tool --python 3.13`; `--force` keeps the `pebble` shim correct across cache restores).
 3. Runs `pebble sdk install <sdk-version>`, which downloads the ARM toolchain and SDK into `~/.pebble-sdk`.
 4. If `build: true`, runs `pebble build` in `working-directory` and exposes the resulting `.pbw` as the `pbw-path` output.
 
