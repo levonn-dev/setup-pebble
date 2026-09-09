@@ -34,7 +34,7 @@ runs:
   steps:
     - name: Cache Pebble SDK and tooling
       if: inputs.cache == 'true'
-      uses: actions/cache@v4
+      uses: actions/cache@v6
       with:
         path: |
           ~/.pebble-sdk

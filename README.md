@@ -12,8 +12,8 @@ It behaves like `setup-node` / `setup-go`: it installs the toolchain so subseque
 
 ```yaml
 steps:
-  - uses: actions/checkout@v4
-  - uses: levonn-dev/setup-pebble@v1
+  - uses: actions/checkout@v7
+  - uses: levonn-dev/setup-pebble@v1.0.2
   - run: pebble build   # or any other pebble command
 ```
 
@@ -21,12 +21,12 @@ steps:
 
 ```yaml
 steps:
-  - uses: actions/checkout@v4
-  - uses: levonn-dev/setup-pebble@v1
+  - uses: actions/checkout@v7
+  - uses: levonn-dev/setup-pebble@v1.0.2
     id: pebble
     with:
       build: 'true'
-  - uses: actions/upload-artifact@v4
+  - uses: actions/upload-artifact@v7
     with:
       name: app-pbw
       path: ${{ steps.pebble.outputs.pbw-path }}
@@ -36,8 +36,8 @@ steps:
 
 ```yaml
 steps:
-  - uses: actions/checkout@v4
-  - uses: levonn-dev/setup-pebble@v1
+  - uses: actions/checkout@v7
+  - uses: levonn-dev/setup-pebble@v1.0.2
     with:
       build: 'true'
       working-directory: watchfaces/my-face
@@ -80,24 +80,28 @@ With `cache: true` (the default), the action caches `~/.pebble-sdk` (SDK + toolc
 A typical workflow for those projects:
 
 ```yaml
-name: Build
+name: CI
+
 on:
   push:
     branches: [main]
   pull_request:
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: levonn-dev/setup-pebble@v1
+      - uses: actions/checkout@v7
+      - uses: levonn-dev/setup-pebble@v1.0.2
         id: pebble
         with:
           build: 'true'
-      - uses: actions/upload-artifact@v4
+          sdk-version: '4.9.169'
+      - uses: actions/upload-artifact@v7
         with:
-          name: pbw
+          name: pebble-adventure-pbw
           path: ${{ steps.pebble.outputs.pbw-path }}
+          if-no-files-found: error
 ```
 
 ## Example project

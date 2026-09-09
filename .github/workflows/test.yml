@@ -11,7 +11,7 @@ jobs:
     name: Setup only (build:false)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Run setup-pebble without building
         uses: ./
@@ -32,7 +32,7 @@ jobs:
     name: Setup and build (build:true)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Run setup-pebble and build the sample watchface
         id: setup
@@ -50,7 +50,7 @@ jobs:
           echo "Build OK."
 
       - name: Upload the built .pbw
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: sample-watchface-pbw
           path: examples/sample-watchface/build/*.pbw
